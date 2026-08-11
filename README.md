@@ -4,6 +4,8 @@ A small, lightweight ASR + NLP pipeline for transcribing audio, cleaning transcr
 
 ## Architecture
 
+![Architecture](docs/architecture.png)
+
 ```text
 Audio input
   → Whisper transcription
@@ -11,8 +13,6 @@ Audio input
   → keyword extraction
   → structured output JSON
 ```
-
-If available, the repo also contains historical material under the legacy/experiment folders that is not part of the active runtime package.
 
 ## What is maintained now
 
@@ -79,9 +79,7 @@ Legacy or historical code has been isolated under:
 │   └── test_text_normalizer.py
 ├── .gitignore
 ├── README.md
-├── pyproject.toml
-├── requirements.txt
-└── architecture.png  (historical file; moved here during cleanup if needed)
+└── pyproject.toml
 ```
 
 ## Local setup
@@ -101,7 +99,7 @@ Real Whisper execution:
 python scripts/run_pipeline.py path/to/audio.wav --model tiny --language zh
 ```
 
-This uses the maintained `WhisperTranscriber`. It will load the Whisper model and transcribe the supplied audio file.
+This uses the maintained `WhisperTranscriber` and loads the Whisper model for the supplied audio file.
 
 Demo/mock mode:
 

@@ -19,8 +19,6 @@ class DemoTranscriber:
         self.language = language
 
     def transcribe(self, audio_path: str, language: str | None = None) -> str:
-        if audio_path and Path(audio_path).exists():
-            return "Customer wants to cancel policy because the premium is too high."
         return "Customer wants to cancel policy because the premium is too high."
 
 
