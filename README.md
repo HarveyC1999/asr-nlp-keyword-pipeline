@@ -1,128 +1,106 @@
-# ASR + NLP Pipeline for Keyword Extraction
+# ASR NLP Keyword Pipeline
 
-This project implements an end-to-end speech-to-text (ASR) and NLP pipeline using Whisper and Python to process unstructured audio data and extract meaningful keywords.
+A small, interview-ready project that demonstrates an ASR pipeline with text cleanup and keyword extraction. The codebase is intentionally kept simple and understandable while separating runtime logic from training and GUI experiments.
 
-The system is designed to automate transcription, improve searchability, and reduce manual text processing efforts in real-world business scenarios.
+## Architecture
 
----
+Audio
+→ ASR transcription
+→ text normalization
+→ keyword extraction
+→ structured output
 
-## 🚀 Features
+## Features
 
-- Speech-to-text transcription using Whisper
-- Keyword extraction and normalization
-- Post-processing and correction pipeline
-- Modular design for extensibility
-- GUI-based demo interface
+- speech transcription interface
+- text normalization and cleanup
+- deterministic keyword extraction
+- small pipeline orchestration layer
+- CLI entry point for local runs
+- test coverage for core logic
 
----
+## Tech Stack
 
-## 🧠 Problem
+- Python 3.11+
+- standard library + lightweight rule-based NLP
+- optional ASR runtime integration via Whisper-compatible backends
+- pytest for regression tests
+- ruff for linting
 
-Processing audio data manually is time-consuming and inefficient.  
-Business users often need to extract key information from conversations, recordings, or speech data.
+## Project Structure
 
-This project aims to:
-- Automate transcription
-- Extract meaningful keywords
-- Enable faster search and analysis
+```text
+asr-nlp-keyword-pipeline/
+├── src/
+│   └── asr_nlp_pipeline/
+│       ├── __init__.py
+│       ├── extraction/
+│       │   ├── __init__.py
+│       │   └── keyword_extractor.py
+│       ├── pipeline.py
+│       ├── preprocessing/
+│       │   ├── __init__.py
+│       │   └── text_normalizer.py
+│       └── transcription/
+│           ├── __init__.py
+│           └── transcriber.py
+├── scripts/
+│   └── run_pipeline.py
+├── tests/
+│   ├── test_keyword_extractor.py
+│   ├── test_pipeline.py
+│   └── test_text_normalizer.py
+├── .gitignore
+├── pyproject.toml
+├── README.md
+└── requirements.txt
+```
 
----
-
-## 🏗️ Architecture
-
-![Architecture](./architecture.png)
-
-### Pipeline Overview
-
-1. Audio input is processed using Whisper for speech-to-text transcription  
-2. Raw transcript is cleaned and normalized using rule-based preprocessing  
-3. NLP techniques are applied for keyword extraction and matching  
-4. Results are stored as structured output for downstream analysis  
-
----
-
-## 🛠️ Tech Stack
-
-- Python3.9+  
-- Whisper (OpenAI)
-- Pyannote (Speaker Diarization)  
-- NLP (custom keyword extraction, normalization)  
-- Regex / rule-based processing  
-- (Optional) GUI interface  
-
----
-
-## 📂 Project Structure
-
-GUI /
-
-|── QAUI.py # GUI interface
-
-STT /
-
-├── STT_demo.py # Speech-to-text demo
-
-├── correcting.py # Text correction & normalization
-
-Tuning/
-
-├── dataset.py # Dataset handling
-
-├── model_conversion.py # Model conversion / tuning
-
-README.md
-
-
----
-
-## 📊 Results
-
-- Achieved >95% keyword matching accuracy after fine-tuning and keyword normalization
-- Reduced manual text processing effort significantly
-- Designed for internal usage scenarios (300+ users)
-
----
-
-## 🧪 Example
-
-**Input (Audio):**
-"Customer wants to cancel the policy due to high premium"
-
-**Output:**
-
-Keywords: ["cancel policy", "high premium"]
-
-
----
-
-## ▶️ How to Run
+## Setup
 
 ```bash
-pip install -r requirements.txt
-python STT/STT_demo.py
-
-(Optional GUI)
-python GUI/QAUI.py
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install pytest ruff
+python -m pip install -e .
 ```
-## Optional Dependencies
 
-Some advanced features require additional setup:
+## Running the Pipeline
 
-- pyannote.audio (speaker diarization)
-- cx_Oracle (database integration)
+```bash
+python scripts/run_pipeline.py path/to/audio.wav
+```
 
-These are not required for basic pipeline execution.
+The CLI validates the input path, runs the pipeline, and prints structured JSON. You may also save the result to a file:
 
-## ⚙️ Future Improvements
-Improve NLP model performance (currently rule-based + tuning)
-Integrate vector search / semantic search
-Deploy as API service
-Add real-time streaming support
+```bash
+python scripts/run_pipeline.py path/to/audio.wav --output outputs/result.json
+```
 
-## 📌 Notes
+## Example Output
 
-This project focuses on practical application of ASR + NLP in business workflows rather than pure model research.
+```json
+{
+  "transcript": "Customer wants to cancel policy because the premium is too high.",
+  "normalized_text": "Customer wants to cancel policy because the premium is too high.",
+  "keywords": ["cancel policy", "high premium"]
+}
+```
 
-## 👤 Author
+## Engineering Decisions
 
-Chung-Han(Harvey) Chang
+- The runtime package is intentionally small and explicit.
+- GUI code and training experiments were not mixed into the runtime package.
+- Hard-coded local paths were removed from the maintained core package.
+- Training-related scripts remain separate from the executable pipeline.
+
+## Limitations
+
+- This project keeps the core logic deterministic and lightweight.
+- Real ASR runs still require a valid local Whisper-compatible runtime and a usable audio file.
+- The default CLI example is intentionally simple and does not download large language or speech models.
+
+## Background
+
+This repository originally combined runtime transcription logic, a business GUI, and training scripts in a single older codebase. The current refactor keeps the useful runtime pieces, isolates the legacy experiment code, and presents the project in a cleaner, interview-ready layout.

@@ -1,3 +1,4 @@
+# Core runtime dependencies for the maintained execution path.
 torch
 pandas
 numpy
@@ -8,3 +9,7 @@ noisereduce
 watchdog
 cn2an
 pycryptodome
+
+# Development tooling
+pytest
+ruff

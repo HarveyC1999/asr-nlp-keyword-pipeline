@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+.env
+models/
+outputs/
+data/
+*.wav
+*.mp3
+*.m4a
