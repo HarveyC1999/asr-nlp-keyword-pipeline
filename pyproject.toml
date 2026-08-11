@@ -8,7 +8,15 @@ version = "0.1.0"
 description = "ASR + NLP keyword extraction pipeline"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "faster-whisper>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6.0",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -18,7 +26,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-
 testpaths = ["tests"]
 
 [tool.ruff]

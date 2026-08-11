@@ -9,30 +9,47 @@ from pathlib import Path
 from asr_nlp_pipeline.extraction.keyword_extractor import KeywordExtractor
 from asr_nlp_pipeline.pipeline import Pipeline
 from asr_nlp_pipeline.preprocessing.text_normalizer import TextNormalizer
+from asr_nlp_pipeline.transcription.transcriber import WhisperTranscriber
 
 
 class DemoTranscriber:
-    """A minimal transcriber implementation for the CLI in local testing environments."""
+    """Small deterministic fallback for demo behavior when no real Whisper runtime is desired."""
 
-    def transcribe(self, audio_path: str) -> str:
-        if not Path(audio_path).exists():
-            raise FileNotFoundError(f"Audio file not found: {audio_path}")
+    def __init__(self, language: str = "zh") -> None:
+        self.language = language
+
+    def transcribe(self, audio_path: str, language: str | None = None) -> str:
+        if audio_path and Path(audio_path).exists():
+            return "Customer wants to cancel policy because the premium is too high."
         return "Customer wants to cancel policy because the premium is too high."
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the ASR + NLP keyword pipeline.")
     parser.add_argument("audio_path", help="Path to an audio file")
     parser.add_argument("--language", default="zh", help="Language hint passed to the ASR runtime")
+    parser.add_argument("--model", default="tiny", help="Whisper model name or local model path")
+    parser.add_argument("--device", default="cpu", help="Torch/Whisper device, e.g. cpu or cuda")
     parser.add_argument("--output", help="Optional JSON path to save the result")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Use a deterministic demo transcriber instead of a real Whisper model.",
+    )
+    args = parser.parse_args(argv)
 
     audio_path = Path(args.audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"Audio file not found: {audio_path}")
 
+    transcriber = DemoTranscriber(language=args.language) if args.demo else WhisperTranscriber(
+        model_size=args.model,
+        device=args.device,
+        language=args.language,
+    )
+
     pipeline = Pipeline(
-        transcriber=DemoTranscriber(),
+        transcriber=transcriber,
         normalizer=TextNormalizer(),
         extractor=KeywordExtractor(),
     )

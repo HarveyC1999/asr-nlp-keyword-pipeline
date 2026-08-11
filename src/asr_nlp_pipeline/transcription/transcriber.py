@@ -1,4 +1,4 @@
-"""Transcription interfaces and an optional Whisper-backed implementation."""
+"""Whisper-backed transcription implementation."""
 
 from __future__ import annotations
 
@@ -7,11 +7,18 @@ from typing import Any
 
 
 class WhisperTranscriber:
-    """Small wrapper around a local Whisper runtime, if available."""
+    """Wrap a local Whisper model without binding to project-specific paths."""
 
-    def __init__(self, model_size: str = "tiny", device: str | None = None, language: str = "zh") -> None:
+    def __init__(
+        self,
+        model_size: str = "tiny",
+        model_path: str | Path | None = None,
+        device: str | None = None,
+        language: str = "zh",
+    ) -> None:
         self.model_size = model_size
-        self.device = device
+        self.model_path = str(model_path) if model_path is not None else None
+        self.device = device or "cpu"
         self.language = language
         self._model: Any | None = None
 
@@ -24,30 +31,20 @@ class WhisperTranscriber:
         except ImportError as exc:  # pragma: no cover - exercised when dependency is absent
             raise RuntimeError(
                 "faster-whisper is required for local transcription. "
-                "Install a compatible runtime or inject a custom transcriber."
+                "Install the project with `pip install -e '.[dev]'` or install faster-whisper manually."
             ) from exc
 
-        model_path = None
-        if model_path is None:
-            # Keep the interface compatible with local runtime use without hard-coding paths.
-            self._model = WhisperModel(self.model_size, device=self.device or "cpu", compute_type="int8")
+        if self.model_path:
+            self._model = WhisperModel(self.model_path, device=self.device, compute_type="int8")
             return self._model
 
-        self._model = WhisperModel(model_path, device=self.device or "cpu", compute_type="int8")
+        self._model = WhisperModel(self.model_size, device=self.device, compute_type="int8")
         return self._model
 
     def transcribe(self, audio_path: str | Path, language: str | None = None) -> str:
         path = Path(audio_path)
         if not path.exists():
             raise FileNotFoundError(f"Audio file not found: {path}")
-
-        try:
-            from faster_whisper import WhisperModel  # noqa: F401
-        except ImportError:
-            raise RuntimeError(
-                "A local Whisper runtime is not available. For a real transcription run, "
-                "install the ASR runtime dependencies and provide a model path."
-            )
 
         model = self._ensure_model()
         segments, _ = model.transcribe(

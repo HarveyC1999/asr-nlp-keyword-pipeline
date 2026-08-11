@@ -1,36 +1,64 @@
 # ASR NLP Keyword Pipeline
 
-A small, interview-ready project that demonstrates an ASR pipeline with text cleanup and keyword extraction. The codebase is intentionally kept simple and understandable while separating runtime logic from training and GUI experiments.
+A small, lightweight ASR + NLP pipeline for transcribing audio, cleaning transcript text, and extracting keywords from the result.
 
 ## Architecture
 
-Audio
-→ ASR transcription
-→ text normalization
-→ keyword extraction
-→ structured output
+```text
+Audio input
+  → Whisper transcription
+  → text normalization
+  → keyword extraction
+  → structured output JSON
+```
+
+If available, the repo also contains historical material under the legacy/experiment folders that is not part of the active runtime package.
+
+## What is maintained now
+
+This repository keeps the runtime code in:
+
+- [src/asr_nlp_pipeline](src/asr_nlp_pipeline)
+- [scripts/run_pipeline.py](scripts/run_pipeline.py)
+- [tests](tests)
+
+Legacy or historical code has been isolated under:
+
+- [experiments/legacy](experiments/legacy)
+- [app/QAUI.py](app/QAUI.py)
 
 ## Features
 
-- speech transcription interface
+- real Whisper-backed transcription through the runtime CLI
+- demo/mock mode for deterministic local testing
 - text normalization and cleanup
-- deterministic keyword extraction
-- small pipeline orchestration layer
-- CLI entry point for local runs
-- test coverage for core logic
+- rule-based keyword extraction
+- structured pipeline output
+- Python package layout with pytest + ruff checks
 
-## Tech Stack
+## Tech stack
 
 - Python 3.11+
-- standard library + lightweight rule-based NLP
-- optional ASR runtime integration via Whisper-compatible backends
-- pytest for regression tests
-- ruff for linting
+- `faster-whisper`
+- standard library for CLI and orchestration
+- `pytest` for tests
+- `ruff` for linting
 
-## Project Structure
+## Repository tree
 
 ```text
-asr-nlp-keyword-pipeline/
+.
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── app/
+│   └── QAUI.py
+├── docs/
+│   └── architecture.png
+├── experiments/
+│   └── legacy/
+├── scripts/
+│   └── run_pipeline.py
 ├── src/
 │   └── asr_nlp_pipeline/
 │       ├── __init__.py
@@ -44,41 +72,46 @@ asr-nlp-keyword-pipeline/
 │       └── transcription/
 │           ├── __init__.py
 │           └── transcriber.py
-├── scripts/
-│   └── run_pipeline.py
 ├── tests/
+│   ├── test_cli.py
 │   ├── test_keyword_extractor.py
 │   ├── test_pipeline.py
 │   └── test_text_normalizer.py
 ├── .gitignore
-├── pyproject.toml
 ├── README.md
-└── requirements.txt
+├── pyproject.toml
+├── requirements.txt
+└── architecture.png  (historical file; moved here during cleanup if needed)
 ```
 
-## Setup
+## Local setup
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -U pip
-python -m pip install pytest ruff
-python -m pip install -e .
+python -m pip install --upgrade pip
+python -m pip install -e '.[dev]'
 ```
 
-## Running the Pipeline
+## Runtime CLI
+
+Real Whisper execution:
 
 ```bash
-python scripts/run_pipeline.py path/to/audio.wav
+python scripts/run_pipeline.py path/to/audio.wav --model tiny --language zh
 ```
 
-The CLI validates the input path, runs the pipeline, and prints structured JSON. You may also save the result to a file:
+This uses the maintained `WhisperTranscriber`. It will load the Whisper model and transcribe the supplied audio file.
+
+Demo/mock mode:
 
 ```bash
-python scripts/run_pipeline.py path/to/audio.wav --output outputs/result.json
+python scripts/run_pipeline.py path/to/audio.wav --demo
 ```
 
-## Example Output
+This uses a deterministic fake transcriber and is intended for local testing or demos, not for real speech recognition.
+
+## Example output
 
 ```json
 {
@@ -88,19 +121,26 @@ python scripts/run_pipeline.py path/to/audio.wav --output outputs/result.json
 }
 ```
 
-## Engineering Decisions
+## Tests
 
-- The runtime package is intentionally small and explicit.
-- GUI code and training experiments were not mixed into the runtime package.
-- Hard-coded local paths were removed from the maintained core package.
-- Training-related scripts remain separate from the executable pipeline.
+```bash
+python -m pytest -v
+python -m ruff check .
+```
 
-## Limitations
+The test suite uses mock/demo behavior and does not download Whisper models during unit tests.
 
-- This project keeps the core logic deterministic and lightweight.
-- Real ASR runs still require a valid local Whisper-compatible runtime and a usable audio file.
-- The default CLI example is intentionally simple and does not download large language or speech models.
+## Legacy and experiments
 
-## Background
+The project retains older training and GUI artifacts in the archive folders for historical reference only:
 
-This repository originally combined runtime transcription logic, a business GUI, and training scripts in a single older codebase. The current refactor keeps the useful runtime pieces, isolates the legacy experiment code, and presents the project in a cleaner, interview-ready layout.
+- [app/QAUI.py](app/QAUI.py)
+- [experiments/legacy](experiments/legacy)
+
+These are not part of the maintained runtime package or the default CLI path.
+
+## Notes
+
+- This project is intentionally small and deterministic.
+- No performance claims or user-count metrics are included unless they are explicitly backed by project evidence.
+- The default runtime remains lightweight and understandable rather than over-abstracted.
