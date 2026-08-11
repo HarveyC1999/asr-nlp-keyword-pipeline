@@ -1,0 +1,10 @@
+torch
+pandas
+numpy
+faster-whisper
+librosa
+soundfile
+noisereduce
+watchdog
+cn2an
+pycryptodome
